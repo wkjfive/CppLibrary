@@ -1,34 +1,34 @@
-#ifndef _SEGMENT_TREE_H__
-#define _SEGMENT_TREE_H__
+#ifndef __SEGMENT_TREE_H__
+#define __SEGMENT_TREE_H__
 
-//±¾Ïß¶ÎÊ÷ÒÔ Âå¹ÈP3373¡¾Ä£°å¡¿Ïß¶ÎÊ÷2 ÎªÔ­ĞÍ£¬ÊÇ
-//·Ç¶¯Ì¬¿ªµã¡¢±ê¼ÇÏÂ´«µÄÏß¶ÎÊ÷£¬Ö§³ÖÇø¼ä¼Ó¡¢
-//Çø¼ä³Ë¡¢Çø¼äÇóºÍ²Ù×÷¡£¸ÃÏß¶ÎÊ÷µÄËùÓĞ½ÚµãĞÅÏ¢Ê¹ÓÃ 
-//¶¯Ì¬¿Õ¼ä£¨¶ÑÄÚ´æ£©´æ´¢¡£ 
-//´úÂëÓÉwkjfive(luogu.com.cn/user/374495)±àĞ´¡£ 
+//æœ¬çº¿æ®µæ ‘ä»¥ æ´›è°·P3373ã€æ¨¡æ¿ã€‘çº¿æ®µæ ‘2 ä¸ºåŸå‹ï¼Œ 
+//æ˜¯åŠ¨æ€å¼€ç‚¹ã€æ ‡è®°ä¸‹ä¼ çš„çº¿æ®µæ ‘ï¼Œ
+//æ”¯æŒåŒºé—´åŠ ã€åŒºé—´ä¹˜ã€åŒºé—´æ±‚å’Œæ“ä½œã€‚
+//è¯¥çº¿æ®µæ ‘çš„æ‰€æœ‰èŠ‚ç‚¹ä¿¡æ¯ä½¿ç”¨å †å†…å­˜å­˜å‚¨ã€‚ 
+//ä»£ç ç”±wkjfive(luogu.com.cn/user/374495)ç¼–å†™ã€‚ 
 
-#include<stdlib.h>
-using namespace std;
+#include<stddef.h>
+//using namespace std;
 typedef long long ll;
 
 class SegmentTree{
-	private:
+	public:
 	class Node{
 		private:
-		ll sum;//Çø¼äºÍ 
-		ll delta;//¼Ó·¨ÑÓ³Ù±ê¼Ç 
-		ll dt2;//³Ë·¨ÑÓ³Ù±ê¼Ç(ÏÈ³ËÔÙ¼Ó) 
-		int lef,righ;//·¶Î§ 
-		ll M;//Ä£Êı 
-		Node *ls,*rs;//×óÓÒº¢×Ó 
+		ll sum;//åŒºé—´å’Œ 
+		ll delta,dt2;//åŠ æ³•ä¹˜æ³•å»¶è¿Ÿæ ‡è®°(å…ˆä¹˜å†åŠ ) 
+		int lef,righ;//èŒƒå›´ 
+		ll M;//æ¨¡æ•° 
+		Node *ls,*rs;//å·¦å³å­©å­ 
 		public:
-		Node(int l,int r,ll Mod=1LL<<62,ll *a=NULL);//½¨Ê÷ 
+		Node(int l,int r,ll Mod=1LL<<62,ll *a=NULL);//å»ºæ ‘ 
 		~Node();
-		void pushdown();//±ê¼ÇÏÂ´« 
-		void modify(int l,int r,ll x);//Çø¼ä¼Ó 
-		void mutip(int l,int r,ll x);//Çø¼ä³Ë 
-		ll query(int l,int r);//Çø¼äÇóºÍ 
+		void pushdown();//æ ‡è®°ä¸‹ä¼  
+		void modify(int l,int r,ll x);//åŒºé—´åŠ  
+		void mutip(int l,int r,ll x);//åŒºé—´ä¹˜ 
+		ll query(int l,int r);//åŒºé—´æ±‚å’Œ 
 	};
+	private:
 	Node *root;
 	public:
 	SegmentTree(int size,ll Mod=1LL<<62,ll *a=NULL){
@@ -39,51 +39,54 @@ class SegmentTree{
 	~SegmentTree(){
 		delete root;
 	}
-	void modify(int l,int r,ll x){//Çø¼ä¼Ó 
+	void modify(int l,int r,ll x){//åŒºé—´åŠ  
 		root->modify(l,r,x);
 	}
-	void mutip(int l,int r,ll x){//Çø¼ä³Ë 
+	void mutip(int l,int r,ll x){//åŒºé—´ä¹˜ 
 		root->mutip(l,r,x);
 	}
-	ll query(int l,int r){//Çø¼äÇóºÍ 
+	ll query(int l,int r){//åŒºé—´æ±‚å’Œ 
 		return root->query(l,r);
 	}
 };
 
-SegmentTree::Node::Node(int l,int r,ll Mod,ll *a){//½¨Ê÷ 
-	M=Mod;
-	lef=l,righ=r;
-	delta=0;dt2=1;
+SegmentTree::Node::Node(int l,int r,ll Mod,ll *a){//å»ºæ ‘ 
+	M=Mod;lef=l,righ=r;delta=0,dt2=1;ls=rs=NULL;
 	if(l==r){
-		if(a!=NULL) sum=a[l];
-		else sum=0;
+		if(a==NULL) sum=0;
+		else sum=a[l];
 	}else{
 		int m=(l+r)/2;
-		ls=new Node(l,m,M,a);
-		rs=new Node(m+1,r,M,a);
-		sum=(ls->sum)+(rs->sum);
+		if(a==NULL) sum=0;
+		else{
+			ls=new Node(l,m,M,a);
+			rs=new Node(m+1,r,M,a);
+			sum=(ls->sum)+(rs->sum);
+		}
 	} sum%=M;
 }
 SegmentTree::Node::~Node(){
 	if(ls!=NULL) delete ls;
 	if(rs!=NULL) delete rs;
 }
-void SegmentTree::Node::pushdown(){//±ê¼ÇÏÂ´« 
-	//×ó 
+void SegmentTree::Node::pushdown(){//æ ‡è®°ä¸‹ä¼  
+	int m=(lef+righ)/2;
+	//å·¦ 
+	if(ls==NULL) ls=new Node(lef,m,M);
 	((ls->sum)*=dt2)%=M;
 	((ls->delta)*=dt2)%=M,((ls->dt2)*=dt2)%=M;
 	((ls->sum)+=delta*((ls->righ)-(ls->lef)+1))%=M;
 	((ls->delta)+=delta)%=M;
-	//ÓÒ 
+	//å³ 
+	if(rs==NULL) rs=new Node(m+1,righ,M);
 	((rs->sum)*=dt2)%=M;
 	((rs->delta)*=dt2)%=M,((rs->dt2)*=dt2)%=M;
 	((rs->sum)+=delta*((rs->righ)-(rs->lef)+1))%=M;
 	((rs->delta)+=delta)%=M;
-	//É¾³ı±ê¼Ç 
-	delta=0;
-	dt2=1;
+	//åˆ é™¤æ ‡è®° 
+	delta=0; dt2=1;
 }
-void SegmentTree::Node::modify(int l,int r,ll x){//Çø¼ä¼Ó 
+void SegmentTree::Node::modify(int l,int r,ll x){//åŒºé—´åŠ  
 	x%=M;
 	if(lef==l&&righ==r){
 		(sum+=x*(righ-lef+1))%=M;
@@ -97,7 +100,7 @@ void SegmentTree::Node::modify(int l,int r,ll x){//Çø¼ä¼Ó
 		sum=(ls->sum)+(rs->sum);
 	}
 }
-void SegmentTree::Node::mutip(int l,int r,ll x){//Çø¼ä³Ë 
+void SegmentTree::Node::mutip(int l,int r,ll x){//åŒºé—´ä¹˜ 
 	x%=M;
 	if(lef==l&&righ==r){
 		(sum*=x)%=M;
@@ -111,7 +114,7 @@ void SegmentTree::Node::mutip(int l,int r,ll x){//Çø¼ä³Ë
 		sum=(ls->sum)+(rs->sum);
 	}
 }
-ll SegmentTree::Node::query(int l,int r){//Çø¼äÇóºÍ 
+ll SegmentTree::Node::query(int l,int r){//åŒºé—´æ±‚å’Œ 
 	if(lef==l&&righ==r){
 		return sum;
 	}else{
@@ -119,8 +122,7 @@ ll SegmentTree::Node::query(int l,int r){//Çø¼äÇóºÍ
 		int m=(lef+righ)/2;
 		if(r<=m) return ls->query(l,r);
 		else if(l>=m+1) return rs->query(l,r);
-		else return ((ls->query(l,m))+
-			(rs->query(m+1,r)))%M;
+		else return ((ls->query(l,m))+(rs->query(m+1,r)))%M;
 	}
 }
 
