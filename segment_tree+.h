@@ -1,8 +1,8 @@
-//±¾Ïß¶ÎÊ÷ÒÔ Âå¹ÈP3373¡¾Ä£°å¡¿Ïß¶ÎÊ÷2 ÎªÔ­ÐÍ£¬ 
-//ÊÇ¶¯Ì¬¿ªµã¡¢±ê¼ÇÏÂ´«µÄÏß¶ÎÊ÷£¬
-//Ö§³ÖÇø¼ä¼Ó¡¢Çø¼ä³Ë¡¢Çø¼äÇóºÍ²Ù×÷¡£
-//¸ÃÏß¶ÎÊ÷µÄËùÓÐ½ÚµãÐÅÏ¢Ê¹ÓÃ¶ÑÄÚ´æ´æ´¢¡£ 
-//´úÂëÓÉwkjfive(luogu.com.cn/user/374495)±àÐ´¡£
+//本线段树以 洛谷P3373【模板】线段树2 为原型， 
+//是动态开点、标记下传的线段树，
+//支持区间加、区间乘、区间求和操作。
+//该线段树的所有节点信息使用堆内存存储。 
+//代码由wkjfive(luogu.com.cn/user/374495)编写。
  
 #ifndef __SEGMENT_TREE_H__
 #define __SEGMENT_TREE_H__
@@ -17,14 +17,14 @@ class SegmentTree{
     private:
     class Node{
         private:
-        Tp sm;//Çø¼äºÍ 
-        Tp dt,dt2;//¼Ó·¨³Ë·¨ÑÓ³Ù±ê¼Ç(ÏÈ³ËÔÙ¼Ó) 
-        int lt,rt;//·¶Î§ 
-        Tp M;//Ä£Êý 
-        Node *ls,*rs;//×óÓÒº¢×Ó 
+        Tp sm;//区间和 
+        Tp dt,dt2;//加法乘法延迟标记(先乘再加) 
+        int lt,rt;//范围 
+        Tp M;//模数 
+        Node *ls,*rs;//左右孩子 
         
         public:
-        Node(int l,int r,Tp Mod=1LL<<62,Tp* a=NULL);//½¨Ê÷ 
+        Node(int l,int r,Tp Mod=1LL<<62,Tp* a=NULL);//建树 
         Node(const Node& x);
         Node& operator=(const Node& x);
         #if defined(__cplusplus) && __cplusplus>=201100L
@@ -33,10 +33,10 @@ class SegmentTree{
         #endif
         ~Node();
         
-        void pushdown();//±ê¼ÇÏÂ´« 
-        void add(int l,int r,Tp k);//Çø¼ä¼Ó 
-        void mutip(int l,int r,Tp k);//Çø¼ä³Ë 
-        Tp sum(int l,int r);//Çø¼äÇóºÍ 
+        void pushdown();//标记下传 
+        void add(int l,int r,Tp k);//区间加 
+        void mutip(int l,int r,Tp k);//区间乘 
+        Tp sum(int l,int r);//区间求和 
     };
     Node *root;
     
@@ -62,24 +62,24 @@ class SegmentTree{
         if(root!=NULL) delete root;
     }
     
-    void add(int l,int r,Tp k){//Çø¼ä¼Ó 
+    void add(int l,int r,Tp k){//区间加 
         root->add(l,r,k);
     }
     void add(int x,int k){
         add(x,x,k);
     }
-    void mutip(int l,int r,Tp k){//Çø¼ä³Ë 
+    void mutip(int l,int r,Tp k){//区间乘 
         root->mutip(l,r,k);
     }
     void mutip(int x,Tp k){
         mutip(x,x,k);
     }
-    Tp sum(int l,int r){//Çø¼äÇóºÍ 
+    Tp sum(int l,int r){//区间求和 
         return root->sum(l,r);
     }
 };
 
-SegmentTree::Node::Node(int l,int r,Tp Mod,Tp* a){//½¨Ê÷ 
+SegmentTree::Node::Node(int l,int r,Tp Mod,Tp* a){//建树 
     M=Mod;lt=l,rt=r;dt=0,dt2=1;ls=rs=NULL;
     if(l==r){
         if(a==NULL) sm=0;
@@ -123,24 +123,24 @@ SegmentTree::Node::~Node(){
     if(rs!=NULL) delete rs;
 }
 
-void SegmentTree::Node::pushdown(){//±ê¼ÇÏÂ´« 
+void SegmentTree::Node::pushdown(){//标记下传 
     int m=(lt+rt)>>1;
-    //×ó 
+    //左 
     if(ls==NULL) ls=new Node(lt,m,M);
     ((ls->sm)*=dt2)%=M;
     ((ls->dt)*=dt2)%=M,((ls->dt2)*=dt2)%=M;
     ((ls->sm)+=dt*((ls->rt)-(ls->lt)+1))%=M;
     ((ls->dt)+=dt)%=M;
-    //ÓÒ 
+    //右 
     if(rs==NULL) rs=new Node(m+1,rt,M);
     ((rs->sm)*=dt2)%=M;
     ((rs->dt)*=dt2)%=M,((rs->dt2)*=dt2)%=M;
     ((rs->sm)+=dt*((rs->rt)-(rs->lt)+1))%=M;
     ((rs->dt)+=dt)%=M;
-    //É¾³ý±ê¼Ç 
+    //删除标记 
     dt=0; dt2=1;
 }
-void SegmentTree::Node::add(int l,int r,Tp k){//Çø¼ä¼Ó 
+void SegmentTree::Node::add(int l,int r,Tp k){//区间加 
     k%=M;
     if(lt==l&&rt==r){
         (sm+=k*(r-l+1))%=M;
@@ -154,7 +154,7 @@ void SegmentTree::Node::add(int l,int r,Tp k){//Çø¼ä¼Ó
         sm=(ls->sm)+(rs->sm);
     }
 }
-void SegmentTree::Node::mutip(int l,int r,Tp k){//Çø¼ä³Ë 
+void SegmentTree::Node::mutip(int l,int r,Tp k){//区间乘 
     k%=M;
     if(lt==l&&rt==r){
         (sm*=k)%=M;
@@ -168,7 +168,7 @@ void SegmentTree::Node::mutip(int l,int r,Tp k){//Çø¼ä³Ë
         sm=(ls->sm)+(rs->sm);
     }
 }
-SegmentTree::Tp SegmentTree::Node::sum(int l,int r){//Çø¼äÇóºÍ     
+SegmentTree::Tp SegmentTree::Node::sum(int l,int r){//区间求和     
     if(lt==l&&rt==r){
         return sm;
     }else{
